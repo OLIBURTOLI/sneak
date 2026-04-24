@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNEAKEE — Men</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0A;
+      --fg: #F5F1EA;
+      --muted: #8A8680;
+      --divider: #1F1D1B;
+      --surface: #141210;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'IBM Plex Mono', monospace;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV (reused from homepage) ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 64px;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--fg);
+      transition: width 200ms var(--ease);
+    }
+
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a.active::after { width: 100%; }
+
+    .wordmark {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      text-decoration: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .nav-icons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-icons svg { stroke: var(--fg); }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 1px;
+      background: var(--fg);
+      transition: transform 300ms var(--ease);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 200px 64px 64px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header-dot-grid {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background-image: radial-gradient(circle, rgba(245,241,234,0.25) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      transform: translateZ(0);
+    }
+
+    .page-header-watermark {
+      position: absolute;
+      right: -120px;
+      top: 50%;
+      transform: translateY(-50%) rotate(180deg);
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 420px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: rgba(245,241,234,0.10);
+      white-space: nowrap;
+      writing-mode: vertical-lr;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .page-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .page-header-left .breadcrumb {
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .page-header-left .breadcrumb a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 200ms var(--ease);
+    }
+
+    .page-header-left .breadcrumb a:hover { color: var(--fg); }
+
+    .page-header-left h1 {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 56px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+
+    .page-header-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .product-count {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      padding: 0 64px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--divider);
+      border-bottom: 1px solid var(--divider);
+      height: 56px;
+    }
+
+    .filter-chips {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      padding: 8px 16px;
+      border: 1px solid var(--divider);
+      background: transparent;
+      cursor: pointer;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .filter-chip:hover { border-color: var(--fg); }
+    .filter-chip.active {
+      background: var(--fg);
+      color: var(--bg);
+      border-color: var(--fg);
+    }
+
+    .sort-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 200ms var(--ease);
+    }
+
+    .sort-btn:hover { color: var(--fg); }
+
+    /* ── PRODUCT GRID ── */
+    .product-grid {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .product-card {
+      width: 25%;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .product-card-img {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .product-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 600ms var(--ease);
+    }
+
+    .product-card:hover .product-card-img img {
+      transform: scale(1.03);
+    }
+
+    .product-card-img .badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      z-index: 1;
+    }
+
+    .product-card-info {
+      padding: 20px 20px 32px;
+    }
+
+    .product-card-brand {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .product-card-title {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.3;
+      color: var(--fg);
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .product-card-colorway {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .product-card-price {
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--fg);
+    }
+
+    /* ── UPCOMING DROP CARDS ── */
+    .product-card.upcoming .product-card-img .plp-countdown {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      width: auto;
+      height: 56px;
+      background: rgba(20,18,16,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 2;
+    }
+
+    .plp-countdown .seg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .plp-countdown .seg .num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 20px;
+      color: var(--fg);
+      line-height: 1;
+    }
+
+    .plp-countdown .seg .lbl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .plp-countdown .colon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--muted);
+      margin-top: -8px;
+    }
+
+    .product-card.upcoming .product-card-info {
+      background: transparent;
+      border-top: none;
+    }
+
+    .drop-notify-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(245,241,234,0.5);
+      background: rgba(10,10,10,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .drop-notify-btn:hover {
+      background: var(--fg);
+      border-color: var(--fg);
+    }
+
+    .drop-notify-btn svg { stroke: var(--fg); transition: stroke 200ms var(--ease); }
+    .drop-notify-btn:hover svg { stroke: var(--bg); }
+
+    .card-hover-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 400ms var(--ease);
+      z-index: 1;
+    }
+
+    .product-card:hover .card-hover-video { opacity: 1; }
+
+    /* ── LOAD MORE ── */
+    .load-more {
+      display: flex;
+      justify-content: center;
+      padding: 64px 0 160px;
+    }
+
+    .load-more-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      padding: 16px 48px;
+      border: 1px solid var(--fg);
+      background: transparent;
+      cursor: pointer;
+      transition: background 200ms var(--ease), color 200ms var(--ease);
+    }
+
+    .load-more-btn:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    /* ── FOOTER (reused from homepage) ── */
+    .footer {
+      border-top: 1px solid var(--divider);
+      padding: 80px 64px 0 64px;
+    }
+
+    .footer-columns {
+      display: flex;
+      gap: 64px;
+      padding-bottom: 64px;
+    }
+
+    .footer-brand {
+      width: 360px;
+      flex-shrink: 0;
+    }
+
+    .footer-brand .logo {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .footer-brand .tagline {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-col { flex: 1; }
+
+    .footer-col h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-col a {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 200ms var(--ease);
+    }
+
+    .footer-col a:hover { color: var(--fg); }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--divider);
+      padding: 32px 0 48px 0;
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .footer-social a {
+      color: var(--muted);
+      transition: color 200ms var(--ease);
+      display: flex;
+    }
+
+    .footer-social a:hover { color: var(--fg); }
+    .footer-social a svg { stroke: currentColor; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .product-card { width: 33.333%; }
+      .page-header-left h1 { font-size: 42px; }
+    }
+
+    @media (max-width: 768px) {
+      .nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .wordmark { font-size: 18px; }
+
+      .page-header {
+        padding: 140px 24px 48px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+      .page-header-left h1 { font-size: 36px; }
+
+      .filter-bar {
+        padding: 0 24px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .filter-bar::-webkit-scrollbar { display: none; }
+
+      .product-card { width: 50%; }
+      .product-card-info { padding: 16px 16px 24px; }
+      .product-card-title { font-size: 13px; }
+      .product-card-price { font-size: 14px; }
+
+      .load-more { padding: 48px 0 96px; }
+
+      .footer { padding: 48px 24px 0 24px; }
+      .footer-columns { flex-direction: column; gap: 40px; }
+      .footer-brand { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .product-card:hover .product-card-img img { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links">
+      <li><a href="sneakee-plp.html" class="active">Men</a></li>
+      <li><a href="#">Women</a></li>
+      <li><a href="#">Kids</a></li>
+    </ul>
+    <a href="sneakee-homepage.html" class="wordmark">SNEAKEE</a>
+    <div class="nav-icons">
+      <button aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button aria-label="Account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="page-header-dot-grid"></div>
+    <div class="page-header-watermark">SNEAKEE</div>
+    <div class="page-header-left">
+      <p class="breadcrumb"><a href="sneakee-homepage.html">Home</a> / Men</p>
+      <h1>Men</h1>
+    </div>
+    <div class="page-header-right">
+      <span class="product-count">48 products</span>
+    </div>
+  </header>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-chips">
+      <button class="filter-chip active">All</button>
+      <button class="filter-chip">Jordan</button>
+      <button class="filter-chip">Nike</button>
+      <button class="filter-chip">Adidas</button>
+      <button class="filter-chip">New Balance</button>
+      <button class="filter-chip">Asics</button>
+      <button class="filter-chip">Salomon</button>
+    </div>
+    <button class="sort-btn">
+      Sort by: Latest
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="product-grid">
+    <div class="product-card">
+      <div class="product-card-img">
+        <span class="badge">New</span>
+        <img src="Media/Images/Product/freepik_clean-ecommerce-product-p_2842330160.png" alt="Air Jordan 1 Retro High OG" loading="lazy">
+        <video class="card-hover-video" muted loop playsinline preload="none">
+          <source src="Media/Video/freepik_animate-this-still-into-a_2844695409.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Jordan</p>
+        <h3 class="product-card-title">Air Jordan 1 Retro High OG 'Shadow 2.0'</h3>
+        <p class="product-card-colorway">Medium Grey / Black / White</p>
+        <p class="product-card-price">&pound;220</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <img src="Media/Images/Product/freepik_assistant_1776870453335.png" alt="Nike Dunk Low" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Nike</p>
+        <h3 class="product-card-title">Nike Dunk Low 'Panda' Premium</h3>
+        <p class="product-card-colorway">Black / White</p>
+        <p class="product-card-price">&pound;185</p>
+      </div>
+    </div>
+    <div class="product-card upcoming" data-drop-offset="451200000">
+      <div class="product-card-img">
+        <span class="badge">Upcoming</span>
+        <button class="drop-notify-btn" aria-label="Add to drop notification"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <img src="Media/Images/Product/freepik_assistant_1776870454432.png" alt="Adidas Samba OG x Wales Bonner" loading="lazy">
+        <div class="plp-countdown"></div>
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Adidas</p>
+        <h3 class="product-card-title">Adidas Samba OG x Wales Bonner 'Cream'</h3>
+        <p class="product-card-colorway">Cream White / Cream White</p>
+        <p class="product-card-price">&pound;180</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <img src="Media/Images/Product/freepik_assistant_1776870455499.png" alt="New Balance 1906R" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">New Balance</p>
+        <h3 class="product-card-title">New Balance 1906R 'Protection Pack'</h3>
+        <p class="product-card-colorway">Silver Metallic / Black</p>
+        <p class="product-card-price">&pound;170</p>
+      </div>
+    </div>
+    <div class="product-card upcoming" data-drop-offset="1047600000">
+      <div class="product-card-img">
+        <span class="badge">Upcoming</span>
+        <button class="drop-notify-btn" aria-label="Add to drop notification"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <img src="Media/Images/Product/freepik_assistant_1776870457426.png" alt="Jordan 4 Retro" loading="lazy">
+        <div class="plp-countdown"></div>
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Jordan</p>
+        <h3 class="product-card-title">Jordan 4 Retro 'Bred Reimagined'</h3>
+        <p class="product-card-colorway">Fire Red / Cement Grey / Black</p>
+        <p class="product-card-price">&pound;210</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <span class="badge">Low Stock</span>
+        <img src="Media/Images/Product/freepik_assistant_1776870458356.png" alt="Nike Air Max 1 '86 OG" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Nike</p>
+        <h3 class="product-card-title">Nike Air Max 1 '86 OG 'Big Bubble'</h3>
+        <p class="product-card-colorway">Sport Red / White</p>
+        <p class="product-card-price">&pound;145</p>
+      </div>
+    </div>
+    <div class="product-card upcoming" data-drop-offset="1573200000">
+      <div class="product-card-img">
+        <span class="badge">Upcoming</span>
+        <button class="drop-notify-btn" aria-label="Add to drop notification"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <img src="Media/Images/Product/freepik_assistant_1776870459266.png" alt="Asics GT-2160" loading="lazy">
+        <div class="plp-countdown"></div>
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Asics</p>
+        <h3 class="product-card-title">Asics GT-2160 x Cecilie Bahnsen</h3>
+        <p class="product-card-colorway">White / Ivory</p>
+        <p class="product-card-price">&pound;230</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <img src="Media/Images/Product/freepik_assistant_1776870461195.png" alt="Salomon XT-6" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Salomon</p>
+        <h3 class="product-card-title">Salomon XT-6 'Phantom'</h3>
+        <p class="product-card-colorway">Phantom / Vanilla Ice</p>
+        <p class="product-card-price">&pound;200</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <span class="badge">New</span>
+        <img src="Media/Images/Product/freepik_assistant_1776870462270.png" alt="New Balance 550" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">New Balance</p>
+        <h3 class="product-card-title">New Balance 550 'Sea Salt'</h3>
+        <p class="product-card-colorway">Sea Salt / White</p>
+        <p class="product-card-price">&pound;160</p>
+      </div>
+    </div>
+    <div class="product-card upcoming" data-drop-offset="2131200000">
+      <div class="product-card-img">
+        <span class="badge">Upcoming</span>
+        <button class="drop-notify-btn" aria-label="Add to drop notification"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+        <img src="Media/Images/Product/freepik_assistant_1776870463526.png" alt="Yeezy 350 V2" loading="lazy">
+        <div class="plp-countdown"></div>
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Adidas</p>
+        <h3 class="product-card-title">Yeezy 350 V2 'Onyx'</h3>
+        <p class="product-card-colorway">Onyx / Onyx / Onyx</p>
+        <p class="product-card-price">&pound;280</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <img src="Media/Images/Product/freepik_assistant_1776870465933.png" alt="Nike Air Max 97" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Nike</p>
+        <h3 class="product-card-title">Nike Air Max 97 'Silver Bullet'</h3>
+        <p class="product-card-colorway">Metallic Silver / Varsity Red</p>
+        <p class="product-card-price">&pound;175</p>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-card-img">
+        <span class="badge">Low Stock</span>
+        <img src="Media/Images/Product/freepik_clean-ecommerce-product-p_2842330160.png" alt="Nike Air Force 1" loading="lazy">
+      </div>
+      <div class="product-card-info">
+        <p class="product-card-brand">Nike</p>
+        <h3 class="product-card-title">Nike Air Force 1 '07 'Triple White'</h3>
+        <p class="product-card-colorway">White / White</p>
+        <p class="product-card-price">&pound;115</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOAD MORE -->
+  <div class="load-more">
+    <button class="load-more-btn">Load More &rarr;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-columns">
+      <div class="footer-brand">
+        <div class="logo">SNEAKEE</div>
+        <p class="tagline">Curated sneakers. London.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="#">Men</a></li>
+          <li><a href="#">Women</a></li>
+          <li><a href="#">Kids</a></li>
+          <li><a href="#">New In</a></li>
+          <li><a href="#">Sale</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Stockists</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2026 Sneakee Ltd.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+        </a>
+        <a href="#" aria-label="X">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733-16z"/><path d="M4 20l6.768-6.768m2.46-2.46L20 4"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Countdown logic for upcoming drop cards
+    const dropCards = document.querySelectorAll('.product-card[data-drop-offset]');
+    const now = Date.now();
+
+    dropCards.forEach(card => {
+      const offset = parseInt(card.dataset.dropOffset, 10);
+      card.dataset.dropTime = now + offset;
+
+      const strip = card.querySelector('.plp-countdown');
+      strip.innerHTML =
+        '<div class="seg"><span class="num" data-unit="d">00</span><span class="lbl">Days</span></div>' +
+        '<span class="colon">:</span>' +
+        '<div class="seg"><span class="num" data-unit="h">00</span><span class="lbl">Hrs</span></div>' +
+        '<span class="colon">:</span>' +
+        '<div class="seg"><span class="num" data-unit="m">00</span><span class="lbl">Min</span></div>' +
+        '<span class="colon">:</span>' +
+        '<div class="seg"><span class="num" data-unit="s">00</span><span class="lbl">Sec</span></div>';
+    });
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function tickCountdowns() {
+      const t = Date.now();
+      dropCards.forEach(card => {
+        const target = parseInt(card.dataset.dropTime, 10);
+        const remaining = target - t;
+        if (remaining <= 0) return;
+        const s = Math.floor(remaining / 1000);
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        const strip = card.querySelector('.plp-countdown');
+        strip.querySelector('[data-unit="d"]').textContent = pad(d);
+        strip.querySelector('[data-unit="h"]').textContent = pad(h);
+        strip.querySelector('[data-unit="m"]').textContent = pad(m);
+        strip.querySelector('[data-unit="s"]').textContent = pad(sec);
+      });
+    }
+
+    tickCountdowns();
+    setInterval(tickCountdowns, 1000);
+
+    // Hover video on product cards
+    document.querySelectorAll('.product-card').forEach(card => {
+      const video = card.querySelector('.card-hover-video');
+      if (!video) return;
+      card.addEventListener('mouseenter', () => {
+        video.currentTime = 0;
+        video.play();
+      });
+      card.addEventListener('mouseleave', () => {
+        video.pause();
+      });
+    });
+  </script>
+
+</body>
+</html>

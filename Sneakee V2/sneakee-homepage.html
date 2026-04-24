@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNEAKEE — Curated Sneakers</title>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0A;
+      --fg: #F5F1EA;
+      --muted: #8A8680;
+      --divider: #1F1D1B;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'IBM Plex Mono', monospace;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 64px;
+      z-index: 100;
+      transition: background 300ms var(--ease), border-color 300ms var(--ease);
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav.scrolled {
+      background: var(--bg);
+      border-bottom-color: var(--divider);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--fg);
+      transition: width 200ms var(--ease);
+    }
+
+    .nav-links a:hover::after { width: 100%; }
+
+    .wordmark {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      text-decoration: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-icons {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .nav-icons button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-icons svg { stroke: var(--fg); }
+
+    /* Hamburger (mobile) */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 1px;
+      background: var(--fg);
+      transition: transform 300ms var(--ease);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85);
+    }
+
+    .hero-dot-grid {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background-image: radial-gradient(circle, rgba(245,241,234,0.25) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 1;
+      transform: translateZ(0);
+    }
+
+    .hero-watermark {
+      position: absolute;
+      right: -120px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 420px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: rgba(245,241,234,0.10);
+      white-space: nowrap;
+      writing-mode: vertical-lr;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1;
+    }
+
+    .hero-gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.7) 100%);
+      pointer-events: none;
+    }
+
+    .hero-text {
+      position: absolute;
+      bottom: 80px;
+      left: 96px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(245,241,234,0.7);
+    }
+
+    .hero-headline {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: clamp(56px, 6.5vw, 96px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .cta-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--fg);
+      transition: width 200ms var(--ease);
+    }
+
+    .cta-link:hover::after { width: 100%; }
+
+    .cta-link .arrow {
+      display: inline-block;
+      transition: transform 200ms var(--ease);
+    }
+
+    .cta-link:hover .arrow { transform: translateX(4px); }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 80px;
+      right: 64px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .scroll-indicator span {
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(245,241,234,0.5);
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    .scroll-indicator .line {
+      width: 1px;
+      height: 40px;
+      background: rgba(245,241,234,0.4);
+    }
+
+    /* ── ABOUT ── */
+    .about-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-dot-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background-image: radial-gradient(circle, rgba(245,241,234,0.18) 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      pointer-events: none;
+      z-index: 0;
+      transform: translateZ(0);
+    }
+
+    .about-watermark {
+      position: absolute;
+      left: -120px;
+      top: 50%;
+      transform: rotate(180deg) translateY(50%);
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 420px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: rgba(245,241,234,0.10);
+      white-space: nowrap;
+      writing-mode: vertical-lr;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    .about {
+      padding: 160px 64px;
+      display: flex;
+      justify-content: space-between;
+      gap: 64px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-title {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 400;
+      font-size: 48px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      width: 420px;
+      flex-shrink: 0;
+    }
+
+    .about-body {
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .about-body p {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: rgba(245,241,234,0.9);
+    }
+
+    .section-divider {
+      width: 100%;
+      padding: 0 64px;
+    }
+
+    .section-divider .line {
+      width: 100%;
+      height: 1px;
+      background: var(--divider);
+    }
+
+    /* ── HOT DROPS CAROUSEL ── */
+    .hot-drops {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .carousel {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .carousel::-webkit-scrollbar { display: none; }
+
+    .slide {
+      position: relative;
+      min-width: 100%;
+      height: 100%;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+
+    .slide-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      will-change: transform;
+    }
+
+    .slide-vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, rgba(10,10,10,0) 40%, rgba(10,10,10,0.6) 100%);
+      pointer-events: none;
+    }
+
+    .slide-bottom-gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,0.7) 100%);
+      pointer-events: none;
+    }
+
+    .slide-content {
+      position: absolute;
+      bottom: 80px;
+      left: 96px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 2;
+    }
+
+    .slide-eyebrow {
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(245,241,234,0.7);
+    }
+
+    .slide-name {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      max-width: 700px;
+    }
+
+    .slide-price {
+      font-weight: 500;
+      font-size: 18px;
+    }
+
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 14px 32px;
+      border: 1px solid var(--fg);
+      background: transparent;
+      color: var(--fg);
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 200ms var(--ease), color 200ms var(--ease);
+      width: fit-content;
+    }
+
+    .ghost-btn:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .slide-counter {
+      position: absolute;
+      bottom: 80px;
+      right: 64px;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: rgba(245,241,234,0.5);
+      z-index: 2;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 2;
+    }
+
+    .progress-segment {
+      width: 40px;
+      height: 1px;
+      background: rgba(245,241,234,0.2);
+      transition: background 300ms var(--ease);
+    }
+
+    .progress-segment.active { background: var(--fg); }
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--fg);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .carousel-arrow:hover { background: var(--fg); }
+    .carousel-arrow svg { stroke: var(--fg); transition: stroke 200ms var(--ease); }
+    .carousel-arrow:hover svg { stroke: var(--bg); }
+    .carousel-arrow.left { left: 32px; }
+    .carousel-arrow.right { right: 32px; }
+
+    /* ── NEWSLETTER ── */
+    .newsletter {
+      padding: 160px 64px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .newsletter-inner {
+      max-width: 640px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      text-align: center;
+    }
+
+    .newsletter-eyebrow {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .newsletter-headline {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 400;
+      font-size: 56px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+
+    .newsletter-sub {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .newsletter-form {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      border-bottom: 1px solid var(--fg);
+      padding-bottom: 0;
+    }
+
+    .newsletter-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--fg);
+      padding: 16px 0;
+    }
+
+    .newsletter-form input::placeholder { color: var(--muted); }
+
+    .newsletter-form button {
+      background: none;
+      border: none;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 0;
+    }
+
+    .newsletter-form button::after {
+      content: '';
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--fg);
+      transition: width 200ms var(--ease);
+    }
+
+    .newsletter-form button:hover::after { width: 100%; }
+    .newsletter-form button .arrow {
+      display: inline-block;
+      transition: transform 200ms var(--ease);
+    }
+    .newsletter-form button:hover .arrow { transform: translateX(4px); }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--divider);
+      padding: 80px 64px 0 64px;
+    }
+
+    .footer-columns {
+      display: flex;
+      gap: 64px;
+      padding-bottom: 64px;
+    }
+
+    .footer-brand {
+      width: 360px;
+      flex-shrink: 0;
+    }
+
+    .footer-brand .logo {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 600;
+      font-size: 32px;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    .footer-brand .tagline {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer-col { flex: 1; }
+
+    .footer-col h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-col a {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 200ms var(--ease);
+    }
+
+    .footer-col a:hover { color: var(--fg); }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--divider);
+      padding: 32px 0 48px 0;
+    }
+
+    .footer-copy {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .footer-social a {
+      color: var(--muted);
+      transition: color 200ms var(--ease);
+      display: flex;
+    }
+
+    .footer-social a:hover { color: var(--fg); }
+    .footer-social a svg { stroke: currentColor; }
+
+    /* ── UPCOMING DROPS ── */
+    .upcoming-drops {
+      padding: 121px 0 222px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upcoming-drops-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 218px;
+      background-image: url('https://app.paper.design/file-assets/01KPTK45P35FK5RBV10MRYE0KE/01KPVCBRB388REGMR1YHF4BGDJ.png');
+      background-size: cover;
+      background-position: 50% 83%;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .upcoming-drops-intro {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 64px;
+      padding: 0 96px;
+    }
+
+    .upcoming-drops-title {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 400;
+      font-size: 48px;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+      flex-shrink: 0;
+    }
+
+    .upcoming-drops-right {
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      flex-shrink: 0;
+    }
+
+    .upcoming-drops-right p {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: rgba(245,241,234,0.9);
+    }
+
+    .upcoming-drops-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .upcoming-nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    .upcoming-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--fg);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .upcoming-nav-btn svg { stroke: var(--fg); transition: stroke 200ms var(--ease); }
+    .upcoming-nav-btn:hover { background: var(--fg); }
+    .upcoming-nav-btn:hover svg { stroke: var(--bg); }
+    .upcoming-nav-btn.disabled { opacity: 0.3; pointer-events: none; }
+
+    .upcoming-carousel-wrap {
+      margin-top: 64px;
+      padding: 0 96px;
+      overflow: hidden;
+    }
+
+    .upcoming-carousel {
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      cursor: grab;
+    }
+
+    .upcoming-carousel:active { cursor: grabbing; }
+    .upcoming-carousel::-webkit-scrollbar { display: none; }
+
+    .drop-card {
+      flex-shrink: 0;
+      width: calc((100% - 72px) / 4);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drop-card-img {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      background: #141210;
+      overflow: hidden;
+    }
+
+    .drop-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 600ms var(--ease);
+    }
+
+    .drop-card:hover .drop-card-img img { transform: scale(1.03); }
+
+    .drop-card-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 400ms var(--ease);
+      z-index: 1;
+    }
+
+    .drop-card:hover .drop-card-video { opacity: 1; }
+
+    .drop-card-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      z-index: 1;
+    }
+
+    .drop-countdown {
+      width: 100%;
+      height: 56px;
+      background: #141210;
+      border-top: 1px solid var(--divider);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .countdown-seg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .countdown-seg .num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 20px;
+      color: var(--fg);
+      line-height: 1;
+    }
+
+    .countdown-seg .label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      line-height: 1;
+    }
+
+    .countdown-colon {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--muted);
+      margin-top: -8px;
+    }
+
+    .drop-countdown .live-now {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      animation: pulse-live 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .drop-card-info {
+      padding: 20px 0 4px 0;
+    }
+
+    .drop-card-title {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 1.2;
+      color: var(--fg);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .drop-card-subtitle {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .drop-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .drop-card-price {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--fg);
+    }
+
+    .drop-card-notify {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--fg);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+
+    .drop-card-notify::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--fg);
+      transition: width 200ms var(--ease);
+    }
+
+    .drop-card-notify:hover::after { width: 100%; }
+    .drop-card-notify .arrow {
+      display: inline-block;
+      transition: transform 200ms var(--ease);
+    }
+    .drop-card-notify:hover .arrow { transform: translateX(4px); }
+
+    .upcoming-progress {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 48px;
+    }
+
+    .upcoming-progress-seg {
+      width: 32px;
+      height: 1px;
+      background: rgba(245,241,234,0.2);
+      transition: background 150ms var(--ease);
+    }
+
+    .upcoming-progress-seg.active { background: var(--fg); }
+
+    @media (max-width: 1279px) and (min-width: 769px) {
+      .drop-card { width: calc((100% - 48px) / 2.5); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .drop-card:hover .drop-card-img img { transform: none; }
+      .drop-countdown .live-now { animation: none; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .about { flex-direction: column; gap: 48px; }
+      .about-title { width: 100%; font-size: 40px; }
+      .about-body { max-width: 100%; }
+      .slide-name { font-size: 42px; max-width: 500px; }
+      .newsletter-headline { font-size: 42px; }
+      .upcoming-drops-intro { flex-direction: column; gap: 48px; }
+      .upcoming-drops-title { width: 100%; font-size: 40px; }
+      .upcoming-drops-right { max-width: 100%; }
+    }
+
+    @media (max-width: 768px) {
+      .nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .wordmark { font-size: 18px; }
+
+      .hero-text { left: 24px; bottom: 48px; gap: 16px; }
+      .hero-headline { font-size: clamp(36px, 10vw, 56px); }
+      .scroll-indicator { display: none; }
+
+      .about { padding: 96px 24px; flex-direction: column; gap: 40px; }
+      .about-title { font-size: 36px; }
+      .section-divider { padding: 0 24px; }
+
+      .slide-content { left: 24px; bottom: 48px; }
+      .slide-name { font-size: 32px; max-width: 300px; }
+      .carousel-arrow { display: none; }
+      .slide-counter { right: 24px; bottom: 48px; }
+      .progress-bar { bottom: 24px; }
+
+      .upcoming-drops { padding: 96px 0; }
+      .upcoming-drops-intro { flex-direction: column; gap: 24px; padding: 0 24px; }
+      .upcoming-drops-title { font-size: 36px; }
+      .upcoming-drops-right { max-width: 100%; }
+      .upcoming-nav { display: none; }
+      .upcoming-carousel-wrap { padding: 0 24px; margin-top: 48px; }
+      .drop-card { width: calc((100% - 24px) / 1.25); }
+      .drop-card-title { font-size: 16px; }
+      .drop-card-price { font-size: 14px; }
+      .countdown-seg .num { font-size: 18px; }
+
+      .newsletter { padding: 96px 24px; }
+      .newsletter-headline { font-size: 36px; }
+
+      .footer { padding: 48px 24px 0 24px; }
+      .footer-columns { flex-direction: column; gap: 40px; }
+      .footer-brand { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <button class="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links">
+      <li><a href="sneakee-plp.html">Men</a></li>
+      <li><a href="#">Women</a></li>
+      <li><a href="#">Kids</a></li>
+    </ul>
+    <a href="sneakee-homepage.html" class="wordmark">SNEAKEE</a>
+    <div class="nav-icons">
+      <button aria-label="Search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button aria-label="Account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <video autoplay muted loop playsinline>
+      <source src="Media/Video/freepik_animate-this-still-into-a_2844484572.mp4" type="video/mp4">
+    </video>
+    <div class="hero-dot-grid"></div>
+    <div class="hero-watermark">SNEAKEE</div>
+    <div class="hero-gradient"></div>
+    <div class="hero-text">
+      <p class="hero-eyebrow">January 2026 / Latest Drops</p>
+      <h1 class="hero-headline">New season.<br>New silhouettes.</h1>
+      <a href="#" class="cta-link">View All Drops <span class="arrow">&rarr;</span></a>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <div class="section-divider"><div class="line"></div></div>
+  <div class="about-wrap">
+    <div class="about-dot-grid"></div>
+    <div class="about-watermark">SNEAKEE</div>
+    <section class="about">
+      <h2 class="about-title">About Sneakee</h2>
+      <div class="about-body">
+        <p>We built Sneakee for collectors who know the difference between a shoe and a statement. Every pair on our shelves is authenticated, hand-selected, and sourced from a network we've spent years cultivating — from Tokyo resellers to London consignors to private archive holders in New York.</p>
+        <p>This isn't a marketplace. It's a curated home for grail-tier sneakers where street culture meets craftsmanship. No filler. No hype for hype's sake. Just the shoes that matter.</p>
+        <a href="#" class="cta-link">Discover More <span class="arrow">&rarr;</span></a>
+      </div>
+    </section>
+  </div>
+
+  <!-- HOT DROPS -->
+  <div class="section-divider"><div class="line"></div></div>
+  <section class="hot-drops">
+    <div class="carousel" id="carousel">
+      <div class="slide">
+        <video class="slide-image" autoplay muted loop playsinline style="filter: brightness(0.85);">
+          <source src="Media/Video/freepik_prompt-animate-this-still_2844633703.mp4" type="video/mp4">
+        </video>
+        <div class="slide-vignette"></div>
+        <div class="slide-bottom-gradient"></div>
+        <div class="slide-content">
+          <p class="slide-eyebrow">Drop 01 / 04</p>
+          <h3 class="slide-name">Air Jordan 1 Retro High OG 'Shadow 2.0'</h3>
+          <p class="slide-price">&pound;220</p>
+          <a href="#" class="ghost-btn">Add to Bag <span class="arrow">&rarr;</span></a>
+        </div>
+        <div class="slide-counter">01 &mdash; 04</div>
+      </div>
+      <div class="slide">
+        <img class="slide-image" src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=1920&q=80" alt="Nike Dunk Low" loading="lazy">
+        <div class="slide-vignette"></div>
+        <div class="slide-bottom-gradient"></div>
+        <div class="slide-content">
+          <p class="slide-eyebrow">Drop 02 / 04</p>
+          <h3 class="slide-name">Nike Dunk Low 'Panda' Premium</h3>
+          <p class="slide-price">&pound;185</p>
+          <a href="#" class="ghost-btn">Add to Bag <span class="arrow">&rarr;</span></a>
+        </div>
+        <div class="slide-counter">02 &mdash; 04</div>
+      </div>
+      <div class="slide">
+        <img class="slide-image" src="https://images.unsplash.com/photo-1584735175315-9d5df23860e6?w=1920&q=80" alt="New Balance 550" loading="lazy">
+        <div class="slide-vignette"></div>
+        <div class="slide-bottom-gradient"></div>
+        <div class="slide-content">
+          <p class="slide-eyebrow">Drop 03 / 04</p>
+          <h3 class="slide-name">New Balance 550 'Sea Salt'</h3>
+          <p class="slide-price">&pound;160</p>
+          <a href="#" class="ghost-btn">Add to Bag <span class="arrow">&rarr;</span></a>
+        </div>
+        <div class="slide-counter">03 &mdash; 04</div>
+      </div>
+      <div class="slide">
+        <img class="slide-image" src="https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=1920&q=80" alt="Yeezy Slide" loading="lazy">
+        <div class="slide-vignette"></div>
+        <div class="slide-bottom-gradient"></div>
+        <div class="slide-content">
+          <p class="slide-eyebrow">Drop 04 / 04</p>
+          <h3 class="slide-name">Yeezy 350 V2 'Onyx'</h3>
+          <p class="slide-price">&pound;280</p>
+          <a href="#" class="ghost-btn">Add to Bag <span class="arrow">&rarr;</span></a>
+        </div>
+        <div class="slide-counter">04 &mdash; 04</div>
+      </div>
+    </div>
+    <button class="carousel-arrow left" aria-label="Previous slide">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <button class="carousel-arrow right" aria-label="Next slide">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-segment active"></div>
+      <div class="progress-segment"></div>
+      <div class="progress-segment"></div>
+      <div class="progress-segment"></div>
+    </div>
+  </section>
+
+  <!-- UPCOMING DROPS -->
+  <div class="section-divider"><div class="line"></div></div>
+  <section class="upcoming-drops">
+    <div class="upcoming-drops-bg"></div>
+    <div class="upcoming-drops-intro">
+      <h2 class="upcoming-drops-title">Upcoming Drops</h2>
+      <div class="upcoming-drops-right">
+        <p>Six releases landing over the coming weeks. Set a reminder, or miss out.</p>
+        <div class="upcoming-drops-controls">
+          <a href="#" class="cta-link">View All <span class="arrow">&rarr;</span></a>
+          <div class="upcoming-nav">
+            <button class="upcoming-nav-btn disabled" id="upcomingPrev" aria-label="Previous">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="upcoming-nav-btn" id="upcomingNext" aria-label="Next">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="upcoming-carousel-wrap">
+      <div class="upcoming-carousel" id="upcomingCarousel" tabindex="0">
+        <div class="drop-card" data-drop-offset="228000000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 01</span>
+            <img src="https://app.paper.design/file-assets/01KPTK45P35FK5RBV10MRYE0KE/7Y8EYE2JJF72PNCYVMV610E445.png" alt="Nike Air Max 1 '86 OG" loading="lazy">
+            <video class="drop-card-video" muted loop playsinline preload="none">
+              <source src="Media/Video/freepik_animate-this-still-into-a_2844695409.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">Nike Air Max 1 '86 OG 'Big Bubble'</div>
+            <div class="drop-card-subtitle">Sport Red / White</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;145</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+        <div class="drop-card" data-drop-offset="451200000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 02</span>
+            <img src="https://app.paper.design/file-assets/01KPTK45P35FK5RBV10MRYE0KE/1PRD4DB4HZGHRKXJYGFPD8F35S.png" alt="Adidas Samba OG x Wales Bonner" loading="lazy">
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">Adidas Samba OG x Wales Bonner 'Cream'</div>
+            <div class="drop-card-subtitle">Cream White / Cream White</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;180</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+        <div class="drop-card" data-drop-offset="770400000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 03</span>
+            <img src="https://app.paper.design/file-assets/01KPTK45P35FK5RBV10MRYE0KE/5XX3SRDPF49XS7A06B3RRNS1SA.png" alt="New Balance 1906R" loading="lazy">
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">New Balance 1906R 'Protection Pack'</div>
+            <div class="drop-card-subtitle">Silver Metallic / Black</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;170</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+        <div class="drop-card" data-drop-offset="1047600000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 04</span>
+            <img src="https://app.paper.design/file-assets/01KPTK45P35FK5RBV10MRYE0KE/1VNS0HSQR2PQR075K9GJ3MNFCR.png" alt="Jordan 4 Retro 'Bred Reimagined'" loading="lazy">
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">Jordan 4 Retro 'Bred Reimagined'</div>
+            <div class="drop-card-subtitle">Fire Red / Cement Grey / Black</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;210</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+        <div class="drop-card" data-drop-offset="1573200000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 05</span>
+            <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&h=1000&fit=crop&q=80" alt="Asics GT-2160 x Cecilie Bahnsen" loading="lazy">
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">Asics GT-2160 x Cecilie Bahnsen</div>
+            <div class="drop-card-subtitle">White / Ivory</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;230</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+        <div class="drop-card" data-drop-offset="2131200000">
+          <div class="drop-card-img">
+            <span class="drop-card-badge">Drop 06</span>
+            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&h=1000&fit=crop&q=80" alt="Salomon XT-6 'Phantom'" loading="lazy">
+          </div>
+          <div class="drop-countdown"></div>
+          <div class="drop-card-info">
+            <div class="drop-card-title">Salomon XT-6 'Phantom'</div>
+            <div class="drop-card-subtitle">Phantom / Vanilla Ice</div>
+          </div>
+          <div class="drop-card-footer">
+            <span class="drop-card-price">&pound;200</span>
+            <a href="#" class="drop-card-notify">Notify Me <span class="arrow">&rarr;</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="upcoming-progress" id="upcomingProgress">
+      <div class="upcoming-progress-seg active"></div>
+      <div class="upcoming-progress-seg active"></div>
+      <div class="upcoming-progress-seg active"></div>
+      <div class="upcoming-progress-seg active"></div>
+      <div class="upcoming-progress-seg"></div>
+      <div class="upcoming-progress-seg"></div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <div class="section-divider"><div class="line"></div></div>
+  <section class="newsletter">
+    <div class="newsletter-inner">
+      <p class="newsletter-eyebrow">Stay in the Loop</p>
+      <h2 class="newsletter-headline">Be first to the drop.</h2>
+      <p class="newsletter-sub">Early access to new releases, restocks, and exclusive drops — straight to your inbox.</p>
+      <form class="newsletter-form" onsubmit="return false;">
+        <input type="email" placeholder="your@email.com" required>
+        <button type="submit">Subscribe <span class="arrow">&rarr;</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-columns">
+      <div class="footer-brand">
+        <div class="logo">SNEAKEE</div>
+        <p class="tagline">Curated sneakers. London.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="#">Men</a></li>
+          <li><a href="#">Women</a></li>
+          <li><a href="#">Kids</a></li>
+          <li><a href="#">New In</a></li>
+          <li><a href="#">Sale</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Stockists</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Shipping</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2026 Sneakee Ltd.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+        </a>
+        <a href="#" aria-label="X">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733-16z"/><path d="M4 20l6.768-6.768m2.46-2.46L20 4"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll behavior
+    const nav = document.getElementById('nav');
+    const hero = document.querySelector('.hero');
+
+    const navObserver = new IntersectionObserver(([entry]) => {
+      nav.classList.toggle('scrolled', !entry.isIntersecting);
+    }, { threshold: 0 });
+
+    navObserver.observe(hero);
+
+    // Carousel
+    const carousel = document.getElementById('carousel');
+    const segments = document.querySelectorAll('.progress-segment');
+    const slides = document.querySelectorAll('.slide');
+    const leftArrow = document.querySelector('.carousel-arrow.left');
+    const rightArrow = document.querySelector('.carousel-arrow.right');
+    let currentSlide = 0;
+
+    function updateProgress() {
+      const scrollLeft = carousel.scrollLeft;
+      const slideWidth = carousel.offsetWidth;
+      const index = Math.round(scrollLeft / slideWidth);
+      currentSlide = index;
+      segments.forEach((seg, i) => {
+        seg.classList.toggle('active', i === index);
+      });
+    }
+
+    carousel.addEventListener('scroll', updateProgress);
+
+    leftArrow.addEventListener('click', () => {
+      if (currentSlide > 0) {
+        carousel.scrollTo({ left: (currentSlide - 1) * carousel.offsetWidth, behavior: 'smooth' });
+      }
+    });
+
+    rightArrow.addEventListener('click', () => {
+      if (currentSlide < slides.length - 1) {
+        carousel.scrollTo({ left: (currentSlide + 1) * carousel.offsetWidth, behavior: 'smooth' });
+      }
+    });
+
+    // ── UPCOMING DROPS ──
+    const upCarousel = document.getElementById('upcomingCarousel');
+    const upPrev = document.getElementById('upcomingPrev');
+    const upNext = document.getElementById('upcomingNext');
+    const upSegments = document.querySelectorAll('.upcoming-progress-seg');
+    const dropCards = document.querySelectorAll('.drop-card');
+    const now = Date.now();
+
+    // Set absolute drop timestamps from offsets
+    dropCards.forEach(card => {
+      const offset = parseInt(card.dataset.dropOffset, 10);
+      card.dataset.dropTime = now + offset;
+    });
+
+    // Build countdown DOM for each card
+    dropCards.forEach(card => {
+      const strip = card.querySelector('.drop-countdown');
+      strip.innerHTML =
+        '<div class="countdown-seg"><span class="num" data-unit="d">00</span><span class="label">Days</span></div>' +
+        '<span class="countdown-colon">:</span>' +
+        '<div class="countdown-seg"><span class="num" data-unit="h">00</span><span class="label">Hrs</span></div>' +
+        '<span class="countdown-colon">:</span>' +
+        '<div class="countdown-seg"><span class="num" data-unit="m">00</span><span class="label">Min</span></div>' +
+        '<span class="countdown-colon">:</span>' +
+        '<div class="countdown-seg"><span class="num" data-unit="s">00</span><span class="label">Sec</span></div>';
+    });
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function tickCountdowns() {
+      const t = Date.now();
+      dropCards.forEach(card => {
+        if (card.classList.contains('is-live')) return;
+        const target = parseInt(card.dataset.dropTime, 10);
+        const remaining = target - t;
+        if (remaining <= 0) {
+          card.classList.add('is-live');
+          const strip = card.querySelector('.drop-countdown');
+          strip.innerHTML = '<span class="live-now">Live Now &rarr;</span>';
+          return;
+        }
+        const s = Math.floor(remaining / 1000);
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        const strip = card.querySelector('.drop-countdown');
+        strip.querySelector('[data-unit="d"]').textContent = pad(d);
+        strip.querySelector('[data-unit="h"]').textContent = pad(h);
+        strip.querySelector('[data-unit="m"]').textContent = pad(m);
+        strip.querySelector('[data-unit="s"]').textContent = pad(sec);
+      });
+    }
+
+    tickCountdowns();
+    setInterval(tickCountdowns, 1000);
+
+    // Carousel nav buttons
+    function getCardScrollUnit() {
+      const card = upCarousel.querySelector('.drop-card');
+      return card.offsetWidth + 24;
+    }
+
+    function updateUpcomingNav() {
+      const sl = upCarousel.scrollLeft;
+      const maxScroll = upCarousel.scrollWidth - upCarousel.clientWidth;
+      upPrev.classList.toggle('disabled', sl <= 1);
+      upNext.classList.toggle('disabled', sl >= maxScroll - 1);
+
+      // Progress segments
+      const cardWidth = getCardScrollUnit();
+      const firstVisible = Math.round(sl / cardWidth);
+      const visibleCount = Math.round(upCarousel.clientWidth / cardWidth) || 1;
+      upSegments.forEach((seg, i) => {
+        seg.classList.toggle('active', i >= firstVisible && i < firstVisible + visibleCount);
+      });
+    }
+
+    upCarousel.addEventListener('scroll', updateUpcomingNav);
+    updateUpcomingNav();
+
+    upPrev.addEventListener('click', () => {
+      upCarousel.scrollBy({ left: -getCardScrollUnit(), behavior: 'smooth' });
+    });
+    upNext.addEventListener('click', () => {
+      upCarousel.scrollBy({ left: getCardScrollUnit(), behavior: 'smooth' });
+    });
+
+    // Keyboard navigation
+    upCarousel.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { upPrev.click(); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { upNext.click(); e.preventDefault(); }
+    });
+
+    // Mouse drag-to-scroll
+    let isDragging = false, startX = 0, scrollStart = 0;
+    upCarousel.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') return;
+      isDragging = true;
+      startX = e.clientX;
+      scrollStart = upCarousel.scrollLeft;
+      upCarousel.setPointerCapture(e.pointerId);
+      upCarousel.style.scrollSnapType = 'none';
+    });
+    upCarousel.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      upCarousel.scrollLeft = scrollStart - dx;
+    });
+    upCarousel.addEventListener('pointerup', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      upCarousel.style.scrollSnapType = 'x mandatory';
+    });
+
+    // Drop card hover video
+    document.querySelectorAll('.drop-card').forEach(card => {
+      const video = card.querySelector('.drop-card-video');
+      if (!video) return;
+      card.addEventListener('mouseenter', () => {
+        video.currentTime = 0;
+        video.play();
+      });
+      card.addEventListener('mouseleave', () => {
+        video.pause();
+      });
+    });
+
+    // Hide hero poster once video loads
+    const video = document.querySelector('.hero video');
+    const poster = document.querySelector('.hero-poster');
+    if (video && poster) {
+      video.addEventListener('playing', () => {
+        poster.style.opacity = '0';
+        poster.style.transition = 'opacity 400ms';
+      });
+    }
+  </script>
+
+</body>
+</html>
